@@ -1,0 +1,175 @@
+---
+title: "Homework 2"
+author: "Aditya Prasad"
+Github Repo: 
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
+---
+                                                        UT EID: arp4759
+
+```{r, echo = FALSE, include = FALSE, message = FALSE}
+library(ggplot2)
+library(tidyverse)
+library(tinytex)
+```
+
+```{r, echo = FALSE, message=FALSE}
+profs <- read_csv('profs.csv')
+
+prof_ggplot <- ggplot(profs)
+
+
+prof_ggplot + geom_histogram(aes(eval)) + 
+  labs(title = "Distribution of Course Evaluations of all Professors", x = "Course Evaluation Score")
+
+```
+
+The distribution of course evaluations of all professors is slightly towards the left and unimodal. The median course value is `r round(median(profs$eval), 2)` and it has a standard deviation of `r round(sd(profs$eval), 2)`
+
+```{r, echo=FALSE, message=FALSE}
+
+prof_ggplot + geom_boxplot(aes(x = native, y = eval)) +
+  labs(title = "Distribution of Evaluations of Native and Non-Native English Speaking Professors",
+       x = "Native", y = "Course Evaluation Score")
+
+
+```
+
+The median course evaluation score of non-native english speaking professors is approximately 3.6, whereas the median course evaluation score of native english speaking professors is approximately 4. Through the plot, the distribution of course evaluation scores is higher for native english speaking professors than non-native speaking professors.
+
+```{r, echo=FALSE, message=FALSE}
+prof_ggplot + geom_histogram(aes(x = eval)) + 
+  facet_grid(vars(gender)) +
+  labs(title = "Distribution of Course Evaluations of Male and Female Profesors", x = "Course Evaluation Score")
+```
+
+The distribution of male and female professors' course evaluation scores are similar as they are both skewed slightly towards the left. However, male professors have a higher peak of course evaluation scores than female professors do.
+
+```{r, echo=FALSE}
+prof_ggplot + geom_point(aes(x = beauty, y = eval)) +
+  labs(title = "Correlation Between Beauty of Professor and their Course Evaluation Scores", 
+       x = "Beauty Rating", y = "Course Evaluation Score")
+```
+
+There is a weak correlation value between the beauty of a professor and their course evaluation score because the correlation value is `r round(cor(profs$beauty, profs$eval), 2)`, which is close to 0.
+
+```{r, echo=FALSE}
+bikeshare <- read_csv('bikeshare.csv')
+
+bikeshare_hourly = bikeshare %>%
+  group_by(hr) %>%
+  summarize(avg_rental_hour = mean(total),
+            hour = hr)
+
+ggplot(bikeshare_hourly) +
+  geom_line(aes(x = hour, y = avg_rental_hour)) +
+  labs(title = "Average Hourly Bike Rentals Across all Hours of Day", x = "Hour", y = "Average Bike Rentals")
+  
+```
+
+The figure shows the average number of bike rentals across all hours of the day. The line graph has two distinct peaks at the 8th hour of the day and 17th hour of the day.
+
+```{r, echo=FALSE}
+bikeshare_hourly_workday = bikeshare %>%
+  group_by(hr, workingday) %>%
+  summarize(avg_rental_hour = mean(total)) 
+
+ggplot(bikeshare_hourly_workday) +
+  geom_line(aes(x = hr, y = avg_rental_hour)) +
+  labs(title = "Average Number of Bike Rentals over Hours of Day", x = "Hour", y = "Average Bike Rentals")+
+  facet_wrap(~ workingday)
+
+```
+
+The Average number of Bike Rentals on weekends has one distinct peak at about the 13th hour of the day. Working days have two distinct peaks at the 7th hour of the day and the 17th hour of the day, which are higher than those of weekends.
+
+```{r, echo=FALSE}
+bikeshare_nine_weather = bikeshare %>%
+  filter(hr == 9) %>%
+  group_by(weathersit, workingday) %>%
+  summarize(avg_rental_hour = mean(total))
+  
+ggplot(bikeshare_nine_weather) +
+  geom_col(aes(x = weathersit, y = avg_rental_hour)) +
+  labs(title = "Average Ridership at 9 AM over different Weather Situations", x = "Weather Situation", y = "Average Bike Rentals") + 
+  facet_wrap(~ workingday)
+```
+
+There are higher average total bike rentals at 9 A.M.for less severe weather, but decreases as weather gets more severe on both weekdays and weekends. There is a higher number of average total bike rentals at 9 A.M. for all weather situations on weekends than on weekdays.
+
+```{r, echo=FALSE}
+capmetro <- read_csv('capmetro_UT.csv')
+capmetro = mutate(capmetro,
+                     day_of_week = factor(day_of_week,
+                       levels=c("Mon", "Tue", "Wed","Thu", "Fri", "Sat", "Sun")),
+                     month = factor(month,
+                        levels=c("Sep", "Oct","Nov")))
+
+capmetro_boardings_day = capmetro %>%
+  group_by(day_of_week, hour_of_day, month) %>%
+  summarise(avg_boardings = mean(boarding))
+
+ggplot(capmetro_boardings_day) + 
+  geom_line(aes(x = hour_of_day, y = avg_boardings, col = month)) +
+  labs(title = "Average Total Boarding by Hour of the Day, Day of the Week, and Month", x = "Hour of Day", y = "Average Total Boarding")+
+  facet_wrap(~ day_of_week)
+```
+
+The figures show the total average boarding on the Cap Metro Bus for UT across all hours of the day, days of the week, and months of the year. The peak boarding time stays broadly similar as in all the figure the graph peaks in between the 15th and 18th hour of the day. The average boardings on Mondays are lower in September due to national holidays such as labor day, when there are no classes. Similarly, the average boardings in November for Wednesday/Thursday/Friday are lower due to the Thanksgiving holiday break when there are no classes and most students have traveled back home for the break.
+
+```{r, echo=FALSE}
+ggplot(capmetro) +
+  geom_point(aes(x = temperature, y = boarding, col = weekend)) +
+  labs(title = "Temperature and Total Boarding Across Hours of the Day", x = "Temperature", y = "Total Boarding")+
+  facet_wrap(~ hour_of_day)
+
+```
+
+This figure shows the temperature and how many total boarding of passengers on the CapMetro Shuttle at UT. Since ther is an even distribution of Total Boardings across all temperature ranges, temperature does not have a noticeable effect on total boardings.
+
+```{r, echo = FALSE}
+billboard <- read.csv('billboard.csv')
+
+billboard_top_songs = billboard %>%
+  group_by(performer, song) %>%
+  summarise(count = max(weeks_on_chart)) %>%
+  select(performer, song, count) %>%
+  arrange(desc(count)) %>%
+  head(10)
+
+billboard_top_songs
+```
+
+This chart shows that top 10 most popular songs since 1958 based on how many weeks they were on the Billboard Top 100 list.
+
+```{r, echo=FALSE}
+music_diversity = billboard %>%
+  group_by(year) %>%
+  filter(year!= 1958, year != 2021) %>%
+  summarise(count = n_distinct(song))
+
+ggplot(music_diversity) + 
+  geom_line(aes(x = year, y = count)) +
+  labs(title = "Music Diversity from 1959 to 2020")
+```
+
+From 1960 to 2000, there is a clear drop in the number of distinct songs created decreased significantly. However, it increased rapidly from around 2001 to 2020.
+
+```{r, echo=FALSE}
+music_10_week_hits = billboard %>%
+  filter(weeks_on_chart >= 10) %>%
+  group_by(performer) %>%
+  summarise(count = n_distinct(song))%>%
+  filter(count >= 30)
+  
+ggplot(music_10_week_hits) + 
+  geom_col(aes(x = performer, y = count)) +
+  labs(title = "Music Artists and how many ten week hits they had", x = "Artist", y = "Number of 10-week Hits")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+```
+
+There are 19 artists who had at least 30 ten-week hits on the billboard top 100 list. The artists had a similar number of 10-week hits, but Elton John had the most with 52 ten-week hits.
